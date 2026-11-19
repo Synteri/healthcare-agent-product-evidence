@@ -1,54 +1,20 @@
-# 🏥 Healthcare Agent Product Evidence — Jacob Schumacher
+# Healthcare Agent Product Evidence
 
-[![Target Role](https://img.shields.io/badge/Target_Role-Sr_AI_Product_Manager,_Healthcare_Agents_(Scale_AI)-blue.svg)](https://scale.com/careers/4709281005)
-[![Domain](https://img.shields.io/badge/Domain-Outpatient_Ops_%7C_EHR/Claims_%7C_Agent_Environments-green.svg)](#)
-[![Status](https://img.shields.io/badge/Status-Applied_%7C_Evidence_Bundle_Ready-success.svg)](#)
-
-> **Core Focus**: Translating outpatient clinical operations, EHR/claims workflows, and PHI privacy boundaries into verifiable AI agent training & evaluation environments.
-
----
-
-## 📌 Fast Skim for Recruiter / Hiring Manager
-
-| Domain Area | Direct Operational & Technical Proof |
-| :--- | :--- |
-| **Outpatient Healthcare Operations** | **4 years** leading operations at a high-volume clinic (~130 visits/wk, ~100 insurance claims/wk including HUSKY/CT Medicaid, EHR administration, CPT/ICD-10 coding). |
-| **Deployed Healthcare AI Product** | Designed & deployed **Patient Recall** (`recall-generator`): 4 months daily use, 1,000s of patient records, 20+ outreach calls/user/day, 7-tier PHI suppression logic. |
-| **Scale AI Task Environment Design** | Authored concrete spec for **Outpatient Claims Readiness RL Environment** ($S, A, O, R$ spaces, rubrics, and Medicaid edge cases). |
-| **Agent Harness Engineering** | 4-iteration progression (`Overseer` → `Lattice` → `Painter` → Harness Engineering) focusing on scoped context budgets, isolated worktrees, and verifier separation. |
-
----
+This portfolio brings together a clinic workflow I put into use and a separate design proposal for evaluating agents on outpatient claims review.
 
 ## 1. Patient Recall Case Study
 
-### The Problem
-Outpatient clinic staff spend hours manually sorting unprioritized EHR exports to manage patient follow-ups and overdue care. This leads to inconsistent outreach, patient over-contacting, missed care adherence, and lost clinic revenue.
+At Fairfield Acupuncture Center, staff tracked missed appointments and patients due for follow-up in Trello. I replaced that process with a prioritized call queue based on visit history and clinic rules. Staff could exclude patients, temporarily defer contact, log outcomes, and review metrics. Staff still decided when to reach out and made the calls themselves.
 
-### The Product (`recall-generator`)
-Built a multi-tenant SaaS prioritization engine with a 5-pillar architecture:
-- 🛡️ **PHI Shield (`data_layer.py`)**: Row-level tenant data isolation & HIPAA compliance.
-- ⚙️ **Smart Suppression Engine (`smart_suppression.py`)**: 7-tier suppression logic (opt-outs, recent contact windows, clinic rules).
-- 💻 **Clinic Outreach CLI**: Fast administrative surface (`recall prioritize`, `recall send-outreach --dry-run`, `recall validate-phi`, `recall export-metrics`).
+I observed that it became easier for staff to decide whom to call next. In the original clinic deployment, I reported roughly four months of daily use, thousands of patient records processed, and more than 20 outreach calls per user per day. These are reported usage figures, not audited measurements of time saved or improvements in patient outcomes.
 
-```
-+-------------------+      +------------------------+      +-----------------------+
-|  EHR Data Export  | ---> |  PHI Shield & 7-Tier   | ---> |  Prioritized Call     |
-| (Raw Patient CSV) |      |   Suppression Engine   |      |  Queue & Telemetry    |
-+-------------------+      +------------------------+      +-----------------------+
-```
-
-### Empirical Production Impact
-* **Daily Deployment**: Used daily for ~4 months across 120–130 patient visits/week.
-* **Volume**: Processed thousands of patient records; supported 20+ outreach calls per user per day.
-* **Workflow Efficiency**: Reduced staff decision time on whom to call next from ~15 min/day to **effectively 0**.
-
-> 💡 **Product Maturity Note**: *"While operational feedback was strongly positive, a future enterprise deployment must instrument contact rate, booking conversion, suppression accuracy, time-to-action, and incremental retained revenue to demonstrate validated causality."*
+For a future rollout, I would measure time to identify the next eligible patient, whether the rules blocked inappropriate outreach, and what happened after staff made contact.
 
 ---
 
-## 2. Example Scale AI Task Environment: Outpatient Claims Readiness
+## 2. Proposed Agent Evaluation: Outpatient Claims Readiness
 
-Demonstrating how domain judgment translates into a formal Reinforcement Learning (RL) agent environment:
+This example is a design proposal for a reinforcement learning (RL) environment, not a deployed claims system.
 
 ### Environment Definition ($S, A, O, R$)
 
@@ -83,17 +49,11 @@ interface ClaimsReadinessEnvironment {
 
 ---
 
-## 3. Agent Environment Lineage
+## 3. Separate Agent Infrastructure Projects
 
-```
-Overseer (v1-v4)  ──►  Lattice Core  ──►  Painter Scaffold  ──►  Harness Engineering
-(Task Dispatch)       (Work Isolation)   (Procedural Eval)     (Verifier Separation)
-```
-
-1. **Overseer (`Overseer-v4`)**: Learned that unbounded LLM loops stall; execution requires deterministic state machines and progress checkpoints.
-2. **Lattice (`Lattice-Core`)**: Proved agents must operate in isolated worktrees with verification gates before merging code or data.
-3. **Painter (`Painter`)**: Replaced free-form LLM generation with composable generator steps evaluated against explicit fitness criteria.
-4. **Harness Engineering**: Demonstrated that scoping agent context tightly and separating the *worker agent* from the *verifier agent* drastically increases execution reliability.
+- **Overseer** explored task dispatch and execution checkpoints.
+- **Lattice** is a separate project that explored isolated workspaces and verification gates.
+- **Painter** explored breaking generation into steps that can be checked against explicit criteria.
 
 ---
 
@@ -101,4 +61,4 @@ Overseer (v1-v4)  ──►  Lattice Core  ──►  Painter Scaffold  ──�
 
 1. **Revenue-Cycle Denial Exception Handling**: High economic ROI, governed by ANSI 835/837 rules, clear denial codes.
 2. **Prior-Authorization Readiness**: High clinical impact, matches unstructured EHR notes against payer coverage guidelines.
-3. **Outpatient Recall Recovery**: Direct patient impact, requires strict 7-tier PHI suppression boundaries.
+3. **Outpatient Recall Recovery**: A staff-led workflow where eligibility, contact preferences, and appropriate suppression matter.
